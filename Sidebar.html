@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 16px;
+        background: #ffffff;
+      }
+      label {
+        display: block;
+        margin-top: 12px;
+        font-weight: bold;
+      }
+      select, textarea, input {
+        width: 100%;
+        padding: 8px;
+        margin-top: 4px;
+        font-size: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+      button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #1155cc;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:hover {
+        background-color: #0b3e91;
+      }
+      ul#results {
+        margin-top: 12px;
+        font-size: 12px;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <label for="headerText">Section Header (e.g. "TECHNOLOGIES & COMPETENCIES")</label>
+    <input type="text" id="headerText" value="TECHNOLOGIES & COMPETENCIES">
+
+    <label for="newContent">Updated Content</label>
+    <textarea id="newContent" rows="6"></textarea>
+
+    <label>Role Location</label>
+    <select id="locationType" onchange="toggleRelocationField()">
+      <option value="Remote – US">Remote</option>
+      <option value="hybrid">Hybrid</option>
+      <option value="onsite">Onsite</option>
+    </select>
+
+    <div id="relocationBox" style="display:none;">
+      <label for="relocationInput">Enter Relocation City/State</label>
+      <input type="text" id="relocationInput" placeholder="e.g. Tampa, FL">
+    </div>
+
+    <label for="strategyOps">Strategy & Operations Title</label>
+    <select id="strategyOps">
+      <option>Strategy & Operations - Program Management Office (Senior Manager)</option>
+      <option>Strategy & Operations (Senior Manager)</option>
+      <option>Strategic Operations (Senior Manager)</option>
+    </select>
+
+    <label for="strategyInsights">Strategy & Insights Title</label>
+    <select id="strategyInsights">
+      <option>Strategy & Insights (Global Program Lead)</option>
+      <option>Strategy & Insights - Data & Analytics (Global Program Lead)</option>
+    </select>
+
+    <label for="financeOps">Finance & Business Ops Title</label>
+    <select id="financeOps">
+      <option>Finance & Business Operations (Senior Analyst, Analyst II, & Analyst I)</option>
+      <option>Finance & Commercial Operations (Senior Analyst, Analyst II, & Analyst I)</option>
+      <option>Finance & Business Operations - Revenue (Senior Analyst, Analyst II, & Analyst I)</option>
+      <option>Finance & Business Operations - Sales (Senior Analyst, Analyst II, & Analyst I)</option>
+      <option>Finance & Commercial Operations - Revenue (Senior Analyst, Analyst II, & Analyst I)</option>
+      <option>Finance & Commercial Operations - Deal Desk (Senior Analyst, Analyst II, & Analyst I)</option>
+    </select>
+
+    <button onclick="updateResume()">Update Resume</button>
+    <button onclick="runFormatCheck()">Run Format Check</button>
+
+    <ul id="results"></ul>
+
+    <script>
+      function toggleRelocationField() {
+        const type = document.getElementById("locationType").value;
+        const box = document.getElementById("relocationBox");
+        box.style.display = (type === "hybrid" || type === "onsite") ? "block" : "none";
+      }
+
+      function updateResume() {
+        const headerText = document.getElementById("headerText").value;
+        const newContent = document.getElementById("newContent").value;
+        const type = document.getElementById("locationType").value;
+        const cityState = document.getElementById("relocationInput").value.trim();
+
+        let locationText = type;
+        if (type === "hybrid" || type === "onsite") {
+          locationText = cityState ? `Open to Relocation (${cityState})` : "Open to Relocation";
+        }
+
+        const strategyOps = document.getElementById("strategyOps").value;
+        const strategyInsights = document.getElementById("strategyInsights").value;
+        const financeOps = document.getElementById("financeOps").value;
+
+        google.script.run.withSuccessHandler(() => {
+          alert("Resume updated successfully!");
+        }).replaceSectionAndLocationAndTitles(
+          headerText,
+          newContent,
+          locationText,
+          strategyOps,
+          strategyInsights,
+          financeOps
+        );
+      }
+
+      function runFormatCheck() {
+        google.script.run.withSuccessHandler(displayIssues).scanForFormattingIssues();
+      }
+
+      function displayIssues(issues) {
+        const results = document.getElementById("results");
+        results.innerHTML = '';
+
+        if (issues.length === 0) {
+          results.innerHTML = '<li style="color: green;">✅ No formatting issues found</li>';
+        } else {
+          issues.forEach(issue => {
+            const li = document.createElement('li');
+            li.textContent = issue;
+            results.appendChild(li);
+          });
+        }
+      }
+    </script>
+  </body>
+</html>
